@@ -1,6 +1,6 @@
 {
-  "enabled": false,
-  "endpoint": "",
-  "token": "",
-  "updated_at": "2026-11-13T06:18:52Z"
+  "enabled": true,
+  "endpoint": "https://biblical-mar-adjustment-quebec.trycloudflare.com",
+  "token": "7vyLZkK_u5Hj2cCrnYSNT-K-2A4PoUtJ",
+  "updated_at": "2026-11-13T06:19:26Z"
 }
