@@ -1,6 +1,6 @@
 {
-  "enabled": true,
-  "endpoint": "https://lighting-coordinator-urls-criticism.trycloudflare.com",
-  "token": "mQLwUjq0Bt9wYdpNcFJoslDnp4gKC0Dq",
-  "updated_at": "2026-11-13T05:36:01Z"
+  "enabled": false,
+  "endpoint": "",
+  "token": "",
+  "updated_at": "2026-11-13T05:42:10Z"
 }
