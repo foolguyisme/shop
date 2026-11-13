@@ -9,13 +9,13 @@
 
 ## 啟動公開客服 AI
 
-1. 確認 `D:\小北\Cloudflared\cloudflared.exe` 已安裝，並且 Ollama、模型、Python 3.9+ 均在本機資料夾與環境中。
+1. 確認 `D:\小北\Cloudflared\cloudflared.exe` 已安裝，並且 Ollama、模型、Python 3.10+ 均在本機資料夾與環境中。
 2. 雙擊 `Xiaobei_App_Local_AI_Bundle\start-local-ai.bat`。
-3. 在啟動視窗找到 `AI-READY LINK`。
-4. 將 AI-ready link 分享給公開訪客。它包含本次隧道網址與臨時存取碼，訪客開啟後會自動連線，不需分別輸入資料。若只分享固定 Pages 網址，訪客須在客服窗手動輸入 BAT 顯示的隧道網址與存取碼。
-5. 保持 BAT 視窗開啟。按 Ctrl+C 或關閉視窗會停止隧道、客服 API 和本機 Ollama；之後訪客只能看到網站，無法使用本機模型。
+3. BAT 會用已登入的 Git Credential Manager 更新公開連線狀態；啟動視窗會顯示固定的公開網站網址。
+4. 訪客直接開啟固定網址即可。網站會自動尋找並連線本機 AI，不需輸入網址、存取碼或按連線；已開啟的頁面也會定期更新狀態。
+5. 保持 BAT 視窗開啟。按 Ctrl+C 或關閉視窗會停止隧道、客服 API 和本機 Ollama，並將網站狀態設為離線。
 
-Cloudflare Quick Tunnel 不需把 Ollama 或 API 連接埠直接開到網際網路；API 僅監聽 `127.0.0.1`。AI-ready link 是本次啟動的限時分享連結，內含臨時存取碼；任何取得此連結的人，在 BAT 執行期間都能使用本機 AI。每次啟動都會產生新的網址與存取碼，停止或重新啟動後舊連結失效。這是展示與試用用的臨時隧道，不是固定服務網址。
+Cloudflare Quick Tunnel 不需把 Ollama 或 API 連接埠直接開到網際網路；API 僅監聽 `127.0.0.1`。BAT 每次啟動會產生新的隧道網址，並更新公開的 `local-ai-status` 狀態分支，讓固定 Pages 網址找到當次服務。此公開示範在 BAT 執行期間開放給網站訪客使用；停止後狀態會轉為離線。Quick Tunnel 是臨時隧道，不是固定服務網址。
 
 ## 客服購物車權限
 
@@ -23,7 +23,7 @@ Cloudflare Quick Tunnel 不需把 Ollama 或 API 連接埠直接開到網際網�
 
 ## GitHub Pages 發佈
 
-`/.github/workflows/deploy-pages.yml` 只發佈網站 HTML、門市資料和 QR Code 腳本。Ollama 執行檔、模型、Cloudflare 執行檔與本機存取碼不在公開網站中。第一次部署時，請在 GitHub repository 的 Settings → Pages → Build and deployment 將 Source 設為 GitHub Actions。
+`/.github/workflows/deploy-pages.yml` 只發佈網站 HTML、門市資料和 QR Code 腳本。Ollama 執行檔、模型和 Cloudflare 執行檔不會發佈。為了讓公開訪客自動連線，BAT 會將當次隧道網址與存取碼放在公開的 `local-ai-status` 分支；因此所有能開啟網站的訪客都能在 BAT 執行時使用客服 AI。啟動 BAT 的 Windows 帳號需有此 GitHub repository 的寫入憑證。
 
 ## 示範資料說明
 

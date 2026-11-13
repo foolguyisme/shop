@@ -6,6 +6,6 @@
 - 本機 AI 分享與啟動說明：`Xiaobei_App_Local_AI_Bundle/LOCAL_AI_AND_DEPLOYMENT.md`
 - 網站與 API 原始碼：`Xiaobei_App_Local_AI_Bundle/`
 
-公開網站不會包含 Ollama 或模型檔。訪客只有在主機啟動 `start-local-ai.bat` 並持續執行期間，才可用每次啟動產生的臨時 HTTPS 隧道連線客服。購物車 AI 需要訪客先按授權按鈕，並明確要求加入指定商品；不會結帳或付款。
+公開網站不會包含 Ollama 或模型檔。主機啟動 `start-local-ai.bat` 後，訪客開啟固定網站就會自動連線至本機 AI；BAT 停止後客服會顯示離線。購物車 AI 需要訪客先按授權按鈕，並明確要求加入指定商品；不會結帳或付款。
 
 商品、庫存、會員與訂單都是示範資料，沒有連接正式 POS 或交易系統。

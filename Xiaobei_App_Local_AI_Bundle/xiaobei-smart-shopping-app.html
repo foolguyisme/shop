@@ -57,7 +57,7 @@
     @media(max-width:900px){.nav-links{display:none;position:absolute;top:77px;left:0;right:0;padding:17px 22px;background:var(--paper);border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch}.nav-links.open{display:flex}.nav-links a{padding:8px 0}.menu-toggle{display:block}.hero-grid,.guide-layout,.inventory-layout,.member-layout,.assistant-layout{grid-template-columns:1fr}.guide-aside{position:static}.campaign-grid{grid-template-columns:1fr}.campaign-mini{grid-template-columns:repeat(4,1fr)}.campaign-card{min-height:180px}.hero-member{max-width:640px}}
     @media(max-width:600px){.wrap{width:min(100% - 28px,1160px)}.demo-banner{font-size:18px}.nav{min-height:70px}.brand{font-size:18px}.brand-mark{width:38px;height:38px}.brand small{font-size:18px}.hero{padding:38px 0 30px}.hero h1{font-size:46px}.hero-meta{gap:14px}.section{padding:42px 0}.section-head{display:block}.section-head .text-link{display:inline-block;margin-top:12px}.campaign-feature{min-height:280px;padding:21px}.campaign-feature h3{font-size:31px}.campaign-mini{grid-template-columns:1fr 1fr}.campaign-card{min-height:150px;padding:14px}.guide-panel{padding:16px}.search-form{flex-direction:column}.guide-primary-card{grid-template-columns:48px minmax(0,1fr);padding:12px}.guide-primary-card .product-icon{width:46px;height:46px}.guide-primary-card .btn{grid-column:1/-1}.product-grid{grid-template-columns:1fr}.product-card{min-height:0}.inventory-top{display:block}.store-picker{align-items:stretch;flex-direction:column}.store-select{min-width:0}.inventory-search{flex-direction:column}.inventory-row{grid-template-columns:44px minmax(0,1fr)}.inventory-row .stock-badge{grid-column:2;justify-self:start}.inventory-row .btn{grid-column:1/3}.assistant-input-row{grid-template-columns:1fr}.assistant-actions{flex-direction:column}.assistant-item{grid-template-columns:42px minmax(0,1fr)}.assistant-item-price{grid-column:2}.map-frame{height:235px}.member-card,.orders-card{padding:17px}.footer-row{align-items:flex-start;flex-direction:column}.cart-line{grid-template-columns:1fr auto}.cart-line .remove-item{grid-column:2}.modal{padding:17px}.modal-actions{flex-direction:column}.result-title{align-items:flex-start;flex-direction:column}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
-  .chat-local-controls{display:grid;gap:7px;padding:9px 12px;border-bottom:1px solid var(--line);background:#fff}.chat-local-field{display:grid;gap:4px;color:var(--green);font-size:13px;font-weight:800}.chat-local-field[hidden]{display:none!important}.chat-local-field input{width:100%;min-width:0;border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:#fffef5;font-size:14px}.chat-local-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.chat-local-connect,.chat-cart-permission{min-width:0;border:1px solid var(--green);border-radius:8px;padding:8px 9px;background:var(--green);color:#fff;font-size:14px;font-weight:900}.chat-cart-permission{background:#fff;color:var(--green)}.chat-cart-permission[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#fff}.chat-local-connect:disabled,.chat-cart-permission:disabled{opacity:.5;cursor:not-allowed}.chat-local-note{margin:0;color:var(--muted);font-size:12px;line-height:1.4}</style>
+  .chat-local-controls{display:grid;gap:7px;padding:9px 12px;border-bottom:1px solid var(--line);background:#fff}.chat-local-field{display:grid;gap:4px;color:var(--green);font-size:13px;font-weight:800}.chat-local-field[hidden],.chat-local-connect[hidden]{display:none!important}.chat-local-field input{width:100%;min-width:0;border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:#fffef5;font-size:14px}.chat-local-buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:7px}.chat-local-connect,.chat-cart-permission{min-width:0;border:1px solid var(--green);border-radius:8px;padding:8px 9px;background:var(--green);color:#fff;font-size:14px;font-weight:900}.chat-cart-permission{background:#fff;color:var(--green)}.chat-cart-permission[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#fff}.chat-local-connect:disabled,.chat-cart-permission:disabled{opacity:.5;cursor:not-allowed}.chat-local-note{margin:0;color:var(--muted);font-size:12px;line-height:1.4}</style>
 </head>
 <body>
   <div class="demo-banner"><strong>互動示範版</strong>　會員、庫存與訂單皆儲存在此瀏覽器，不會連到小北正式系統；請勿輸入真實個資。</div>
@@ -163,11 +163,12 @@
       const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
       const savedCatalog=read(STORAGE.catalog,[]);let products=initialProducts.map(seed=>({...seed,...(savedCatalog.find(saved=>saved.id===seed.id)||{})}));savedCatalog.filter(saved=>!products.some(p=>p.id===saved.id)).forEach(saved=>products.push(saved));write(STORAGE.catalog,products);
       const savedStock=read(STORAGE.stock,initialStock);let stock=Object.fromEntries(Object.keys(initialStock).map(storeId=>[storeId,{...initialStock[storeId],...(savedStock[storeId]||{})}]));
-      let member=read(STORAGE.member,null),orders=read(STORAGE.orders,[]),cart=read(STORAGE.cart,[]),selectedStore=read(STORAGE.store,'kunda'),currentProducts=[],guideQuantities={},assistantBundle=[],assistantQuantities={},assistantBudgetLimit=1000,assistantRequest='',assistantThemeKey='laundry',assistantUnavailable=[],storeResultLimit=10,chatHistory=[],localAiAvailable=false,toastTimer,cartActionConsent=false,localAiEndpoint='',localAiAccessCode='';
+      let member=read(STORAGE.member,null),orders=read(STORAGE.orders,[]),cart=read(STORAGE.cart,[]),selectedStore=read(STORAGE.store,'kunda'),currentProducts=[],guideQuantities={},assistantBundle=[],assistantQuantities={},assistantBudgetLimit=1000,assistantRequest='',assistantThemeKey='laundry',assistantUnavailable=[],storeResultLimit=10,chatHistory=[],localAiAvailable=false,toastTimer,cartActionConsent=false,localAiEndpoint='',localAiAccessCode='',publicAiRefreshBusy=false;
       if(!Array.isArray(cart))cart=[];cart=cart.filter(item=>products.some(p=>p.id===item.id)&&Number(item.qty)>0).map(item=>({id:item.id,qty:Math.floor(Number(item.qty))}));if(!stores[selectedStore])selectedStore='kunda';
       const $=id=>document.getElementById(id), escapeHtml=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       const isLocalApp=['127.0.0.1','localhost'].includes(window.location.hostname);
       const PUBLIC_SITE_ORIGIN='https://foolguyisme.github.io';
+      const LIVE_AI_CONFIG_URL='https://raw.githubusercontent.com/foolguyisme/shop/local-ai-status/Xiaobei_App_Local_AI_Bundle/live-ai.json';
       const stockFor=(storeId,productId)=>Number(stock?.[storeId]?.[productId]??0);
       function showToast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800)}
       function setChatOpen(open){$('chatPanel').hidden=!open;$('supportToggle').setAttribute('aria-expanded',String(open));$('supportToggle').setAttribute('aria-label',open?'關閉客服':'開啟客服');$('supportToggleLabel').textContent=open?'關閉客服':'需要幫忙嗎？客服';if(open)$('chatInput').focus()}
@@ -184,7 +185,7 @@
         if(/真人|電話|聯絡|客服人員/.test(q))return{text:'需要真人協助，可聯絡小北官方客服專線 0800-002-198（服務時間以官方公告為準）。',href:'tel:0800002198',label:'撥打 0800-002-198'};
         return{text:'我可以協助你查詢示範庫存、下單取貨、訂單 QR Code、付款方式或會員優惠。也可直接聯絡真人客服。',href:'tel:0800002198',label:'真人客服 0800-002-198'};
       }
-      function prepareLocalAiFields(){const query=new URLSearchParams(window.location.search);const requestedEndpoint=query.get('ai_endpoint')||'';const requestedAccessCode=query.get('ai_access_code')||'';if(isLocalApp){$('publicEndpointField').hidden=true;$('aiAccessCodeField').hidden=true;localAiEndpoint=window.location.origin;$('localAiEndpoint').value=localAiEndpoint}else{localAiEndpoint=requestedEndpoint;localAiAccessCode=requestedAccessCode;$('localAiEndpoint').value=requestedEndpoint;$('localAiAccessCode').value=requestedAccessCode;const autoConfigured=Boolean(requestedEndpoint&&requestedAccessCode);$('publicEndpointField').hidden=autoConfigured;$('aiAccessCodeField').hidden=autoConfigured}updateCartPermissionUi()}
+      function prepareLocalAiFields(){const query=new URLSearchParams(window.location.search);const requestedEndpoint=query.get('ai_endpoint')||'';const requestedAccessCode=query.get('ai_access_code')||'';if(isLocalApp){$('publicEndpointField').hidden=true;$('aiAccessCodeField').hidden=true;localAiEndpoint=window.location.origin;$('localAiEndpoint').value=localAiEndpoint}else{$('publicEndpointField').hidden=true;$('aiAccessCodeField').hidden=true;$('connectLocalAi').hidden=true;localAiEndpoint=requestedEndpoint;localAiAccessCode=requestedAccessCode;$('localAiEndpoint').value=requestedEndpoint;$('localAiAccessCode').value=requestedAccessCode}updateCartPermissionUi()}
       function updateCartPermissionUi(){const button=$('cartActionPermission');button.disabled=!localAiAvailable;button.setAttribute('aria-pressed',String(cartActionConsent));button.textContent=cartActionConsent?'取消 AI 購物車權限':'授權 AI 加入購物車';$('cartPermissionStatus').textContent=cartActionConsent?'已授權：只依你明確指示將商品加入購物車；不會結帳或付款。可隨時撤回。':(localAiAvailable?'未授權｜AI 只能回答，不能修改購物車。':'未連線｜AI 尚不能修改購物車。')}
       function resolveAiEndpoint(){if(isLocalApp)return window.location.origin;const raw=$('localAiEndpoint').value.trim();const endpoint=new URL(raw);if(endpoint.protocol!=='https:'||!endpoint.hostname.toLowerCase().endsWith('.trycloudflare.com')||endpoint.pathname!=='/'||endpoint.search||endpoint.hash||endpoint.username||endpoint.password)throw new Error('請輸入啟動 BAT 顯示的 HTTPS trycloudflare.com 網址。');return endpoint.origin}
       function localAiHeaders(json=false){const headers={};if(json)headers['Content-Type']='application/json';if(!isLocalApp&&localAiAccessCode)headers.Authorization='Bearer '+localAiAccessCode;return headers}
@@ -196,7 +197,7 @@
           localAiEndpoint=endpoint;
           const response=await fetch(localAiEndpoint+'/api/health',{method:'GET',headers:localAiHeaders(),cache:'no-store'});
           const data=await response.json().catch(()=>({}));
-          if(response.status===401)throw new Error('存取碼失效或不正確；請使用目前 BAT 印出的 AI-READY LINK。');
+          if(response.status===401)throw new Error('本機 AI 存取碼已失效；網站會自動更新連線狀態。');
           if(!response.ok)throw new Error(data.error||('健康檢查失敗（HTTP '+response.status+'）'));
           if(!data.ok)throw new Error(data.error||'主機上的本機模型尚未就緒。');
           localAiAvailable=true;cartActionConsent=false;$('supportStatus').textContent='本機 AI 已連線｜'+data.model;button.textContent='重新連線 AI';updateCartPermissionUi()
@@ -205,15 +206,44 @@
           $('supportStatus').textContent='本機 AI 未連線｜'+detail;$('cartPermissionStatus').textContent=detail;button.textContent='連線本機 AI';updateCartPermissionUi()
         }finally{button.disabled=false}
       }
+      function setPublicAiOffline(message){localAiAvailable=false;cartActionConsent=false;$('supportStatus').textContent=message;updateCartPermissionUi()}
+      async function refreshPublicAiConfig(){
+        if(isLocalApp||publicAiRefreshBusy)return;
+        publicAiRefreshBusy=true;let checkingHealth=false;
+        try{
+          const response=await fetch(LIVE_AI_CONFIG_URL+'?v='+Date.now(),{cache:'no-store'});
+          if(response.status===404){setPublicAiOffline('本機 AI 尚未啟動｜啟動主機 BAT 後會自動連線');return}
+          if(!response.ok)throw new Error('連線狀態查詢失敗（HTTP '+response.status+'）');
+          const config=await response.json();
+          if(!config.enabled||!config.endpoint||!config.token){setPublicAiOffline('本機 AI 尚未啟動｜啟動主機 BAT 後會自動連線');return}
+          const endpoint=new URL(config.endpoint);
+          if(endpoint.protocol!=='https:'||!endpoint.hostname.toLowerCase().endsWith('.trycloudflare.com'))throw new Error('本機 AI 狀態中的隧道網址格式不正確。');
+          const normalizedEndpoint=endpoint.origin;
+          if(localAiEndpoint!==normalizedEndpoint||localAiAccessCode!==String(config.token)){
+            localAiEndpoint=normalizedEndpoint;localAiAccessCode=String(config.token);$('localAiEndpoint').value=localAiEndpoint;$('localAiAccessCode').value=localAiAccessCode;localAiAvailable=false;cartActionConsent=false
+          }
+          if(!localAiAvailable){await connectLocalAi();return}
+          checkingHealth=true;
+          const healthResponse=await fetch(localAiEndpoint+'/api/health',{method:'GET',headers:localAiHeaders(),cache:'no-store'});
+          const health=await healthResponse.json().catch(()=>({}));
+          if(healthResponse.status===401){setPublicAiOffline('本機 AI 存取碼已失效｜等待主機更新連線狀態');return}
+          if(!healthResponse.ok||!health.ok){setPublicAiOffline('本機 AI 暫時無法連線｜'+String(health.error||('HTTP '+healthResponse.status)));return}
+          $('supportStatus').textContent='本機 AI 已連線｜'+health.model;updateCartPermissionUi()
+        }catch(error){
+          const detail=String(error?.message||error||'未知錯誤').slice(0,200);
+          if(checkingHealth)setPublicAiOffline('本機 AI 連線中斷｜'+detail);
+          else if(!localAiAvailable){$('supportStatus').textContent='本機 AI 狀態查詢失敗｜'+detail;updateCartPermissionUi()}
+        }finally{publicAiRefreshBusy=false}
+      }
       function applyAiCartAction(action){if(!cartActionConsent||!localAiAvailable||!action||action.type!=='add_to_cart'||!Array.isArray(action.items))return[];const added=[];for(const item of action.items.slice(0,5)){const product=products.find(p=>p.id===String(item.product_id||''));if(!product)continue;const wanted=Math.floor(Number(item.quantity));if(!Number.isFinite(wanted)||wanted<1)continue;const current=cart.find(row=>row.id===product.id);const room=Math.max(0,stockFor(selectedStore,product.id)-(current?.qty||0));const quantity=Math.min(10,wanted,room);if(!quantity)continue;if(current)current.qty+=quantity;else cart.push({id:product.id,qty:quantity});added.push({product,quantity})}if(added.length){renderCart();showToast('AI 已依你的指示加入購物車；尚未結帳。');openModal('cartModal')}return added}
       async function supportAnswer(question,history=[]){
         const fallback=supportFallback(question);
-        if(!localAiAvailable){const intro=isLocalApp?'本機 AI 尚未連線，請按「連線本機 AI」。':'本機 AI 尚未連線，請開啟目前 BAT 提供的 AI-READY LINK。';return{...fallback,text:intro+'\n'+fallback.text,mode:'faq'}}
+        if(!localAiAvailable){const intro=isLocalApp?'本機 AI 尚未連線，請按「連線本機 AI」。':'本機 AI 尚未啟動，網站會自動連線；請稍候或重新整理。';return{...fallback,text:intro+'\n'+fallback.text,mode:'faq'}}
         try{
           const context={store:{name:selectedStoreData().name,city:selectedStoreData().city,district:selectedStoreData().district,address:selectedStoreData().address},availableProducts:products.filter(p=>stockFor(selectedStore,p.id)>0).map(p=>({id:p.id,name:p.name,category:p.category,aisle:p.aisle,price:p.price,stock:stockFor(selectedStore,p.id)})).slice(0,45)};
           const response=await fetch(localAiEndpoint+'/api/chat',{method:'POST',headers:localAiHeaders(true),body:JSON.stringify({message:question,history,context,cart_permission:cartActionConsent})});
           const data=await response.json().catch(()=>({}));
-          if(response.status===401){localAiAvailable=false;cartActionConsent=false;$('supportStatus').textContent='AI 存取碼失效｜請重新開啟目前 BAT 的 AI-READY LINK';updateCartPermissionUi();return{...fallback,text:'本機 AI 存取碼已失效，請使用目前 BAT 印出的 AI-READY LINK 重新連線。購物車沒有變更。\n\n'+fallback.text,mode:'fallback'}}
+          if(response.status===401){localAiAvailable=false;cartActionConsent=false;$('supportStatus').textContent='AI 連線憑證失效｜網站會自動更新';updateCartPermissionUi();return{...fallback,text:'本機 AI 連線憑證已失效，網站會自動更新連線狀態。購物車沒有變更。\n\n'+fallback.text,mode:'fallback'}}
           if(response.status===429){const reason=String(data.error||'本機 AI 正在處理其他問題，請稍後重試。');$('supportStatus').textContent='本機 AI 忙碌｜請稍後重試';return{...fallback,text:reason+'\n\n本次沒有修改購物車，請稍候再傳一次。',mode:'local'}}
           if(!response.ok)throw new Error(data.error||('客服 API 回應 HTTP '+response.status));
           if(!data.reply)throw new Error('本機 AI 回傳空白內容。');
@@ -222,7 +252,7 @@
           const detail=String(error?.message||error||'未知錯誤').slice(0,240);let healthData=null;
           try{const healthResponse=await fetch(localAiEndpoint+'/api/health',{method:'GET',headers:localAiHeaders(),cache:'no-store'});if(healthResponse.ok)healthData=await healthResponse.json()}catch{}
           if(healthData?.ok){localAiAvailable=true;$('supportStatus').textContent='本機 AI 已連線｜'+healthData.model;updateCartPermissionUi();return{...fallback,text:'這次客服請求失敗：'+detail+'。本機 AI 仍在線上，請稍候重試；購物車沒有變更。\n\n'+fallback.text,mode:'fallback'}}
-          localAiAvailable=false;cartActionConsent=false;$('supportStatus').textContent='本機 AI 連線中斷｜'+detail;updateCartPermissionUi();return{...fallback,text:'本機 AI 無法回覆：'+detail+'。請確認 BAT 視窗仍開啟，並使用本次 AI-READY LINK 重新連線。購物車沒有變更。\n\n'+fallback.text,mode:'fallback'}
+          localAiAvailable=false;cartActionConsent=false;$('supportStatus').textContent='本機 AI 連線中斷｜'+detail;updateCartPermissionUi();return{...fallback,text:'本機 AI 無法回覆：'+detail+'。請確認主機 BAT 視窗仍開啟，網站會自動重新連線。購物車沒有變更。\n\n'+fallback.text,mode:'fallback'}
         }
       }
       async function askSupport(question){const value=String(question||'').trim();if(!value)return;addChatMessage(value,'user');const history=chatHistory.slice(-8);const pending=addChatMessage(localAiAvailable?'本機 AI 正在整理問題…':'客服正在整理示範指引…','assistant');pending.setAttribute('aria-busy','true');const answer=await supportAnswer(value,history);let finalText=answer.text;if(answer.cartAction){if(cartActionConsent&&localAiAvailable){const added=applyAiCartAction(answer.cartAction);if(added.length)finalText+='\n\n已加入購物車：'+added.map(row=>row.product.name+' × '+row.quantity).join('、')+'。這是示範購物車，尚未下單或付款。';else finalText+='\n\n我沒有修改購物車，因為商品無庫存或無法確認指定品項。'}else finalText+='\n\n購物車權限目前未開啟，購物車沒有變更。'}pending.removeAttribute('aria-busy');pending.firstChild.textContent=finalText;chatHistory.push({role:'user',content:value},{role:'assistant',content:finalText});if(answer.href)addChatLink(pending,answer.href,answer.label);$('chatLog').scrollTop=$('chatLog').scrollHeight}
@@ -405,8 +435,8 @@
       document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeModal(backdrop.id)}));document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>closeModal(m.id))});
       $('menuToggle').addEventListener('click',()=>{const open=$('navLinks').classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open));$('menuToggle').textContent=open?'×':'☰'});$('navLinks').querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(a.dataset.accountView)activateAccountTab(a.dataset.accountView);$('navLinks').classList.remove('open');$('menuToggle').setAttribute('aria-expanded','false');$('menuToggle').textContent='☰'}));
       $('couponSelect').innerHTML='<option value="">不使用優惠券</option>';
-      async function checkSupportMode(){if(!isLocalApp){if(localAiEndpoint&&localAiAccessCode){await connectLocalAi();return}localAiAvailable=false;$('supportStatus').textContent='本機 AI 未連線｜請開啟 BAT 提供的 AI 專用連結';updateCartPermissionUi();return}await connectLocalAi()}
-      renderStores();renderMember();renderCampaigns();renderInventoryCategories();renderInventory();runGuide('洗衣精');renderCart();prepareLocalAiFields();addChatMessage('你好！可詢問門市與商品；連線本機 AI 後可使用 AI 客服。', 'assistant');checkSupportMode();
+      async function checkSupportMode(){if(!isLocalApp){$('supportStatus').textContent='正在自動尋找本機 AI…';refreshPublicAiConfig();window.setInterval(()=>{if(document.visibilityState==='visible')refreshPublicAiConfig()},15000);return}await connectLocalAi()}
+      renderStores();renderMember();renderCampaigns();renderInventoryCategories();renderInventory();runGuide('洗衣精');renderCart();prepareLocalAiFields();addChatMessage('你好！可詢問門市與商品；主機啟動本機 AI 後，網站會自動連線。', 'assistant');checkSupportMode();
     })();
   </script>
 </body>
