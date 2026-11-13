@@ -141,6 +141,54 @@ def _validated_cart_action(tool_calls: list, allowed: dict[str, dict]) -> dict |
     }
 
 
+def _cart_action_from_reply(reply: str, allowed: dict[str, dict]) -> tuple[dict | None, bool, str]:
+    decoder = json.JSONDecoder()
+    parsed = None
+    start = end = -1
+    for match in re.finditer(r"\{", reply):
+        try:
+            candidate, length = decoder.raw_decode(reply[match.start():])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(candidate, dict):
+            parsed = candidate
+            start = match.start()
+            end = start + length
+            break
+    if parsed is None:
+        return None, False, reply
+
+    action_name = str(parsed.get("action", parsed.get("type", ""))).strip().lower()
+    if action_name not in ("add", "add_to_cart", "add_products_to_cart"):
+        return None, False, reply
+
+    rows = parsed.get("items")
+    if not isinstance(rows, list):
+        item = parsed.get("item")
+        rows = [item] if isinstance(item, dict) else []
+    normalized = []
+    for row in rows[:5]:
+        if not isinstance(row, dict):
+            continue
+        product_id = row.get("product_id", row.get("id", ""))
+        normalized.append(
+            {
+                "product_id": str(product_id).strip(),
+                "quantity": row.get("quantity", row.get("qty", 1)),
+            }
+        )
+    tool_call = {
+        "function": {
+            "name": "add_products_to_cart",
+            "arguments": {"items": normalized},
+        }
+    }
+    cart_action = _validated_cart_action([tool_call], allowed)
+    cleaned_reply = (reply[:start] + reply[end:]).strip()
+    cleaned_reply = re.sub(r"```(?:json)?", "", cleaned_reply, flags=re.IGNORECASE).replace("```", "").strip()
+    return cart_action, True, cleaned_reply
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -321,6 +369,20 @@ class Handler(SimpleHTTPRequestHandler):
                 if allow_cart_action and isinstance(tool_calls, list)
                 else None
             )
+            reply_cart_action, has_cart_json, clean_reply = _cart_action_from_reply(
+                reply, allowed_products
+            )
+            if allow_cart_action and cart_action is None:
+                cart_action = reply_cart_action
+            if has_cart_json:
+                if cart_action:
+                    reply = clean_reply or "好的，我已依你的指示將商品加入購物車。"
+                elif not cart_permission:
+                    reply = "購物車授權尚未開啟，因此我沒有修改購物車。請先按「授權 AI 加入購物車」，再明確提出加入商品的要求。"
+                elif not explicit_cart_request:
+                    reply = "這則訊息沒有明確要求加入購物車，所以我沒有修改購物車。"
+                else:
+                    reply = clean_reply or "我無法確認指定商品或庫存，因此沒有修改購物車。"
             if not allow_cart_action and re.search(
                 r"(?:已加入|已經加入|已放進|已放入|幫你加入|已為你加入).{0,12}購物車", reply
             ):
