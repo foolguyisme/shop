@@ -217,6 +217,42 @@ def _cart_action_from_reply(reply: str, allowed: dict[str, dict]) -> tuple[dict 
     return cart_action, True, cleaned_reply
 
 
+def _cart_action_from_user_request(message: str, allowed: dict[str, dict]) -> dict | None:
+    text = re.sub(r"\s+", "", message).casefold()
+    ignored_aliases = {"家用", "用品", "產品", "商品", "清潔", "收納", "生活", "居家", "配件"}
+    aliases: dict[str, set[str]] = {}
+    for product_id, product in allowed.items():
+        name = re.sub(r"\s+", "", product["name"]).casefold()
+        for alias in (product_id.casefold(), name, *(name[index:] for index in range(1, len(name)))):
+            if len(alias) >= 2 and alias not in ignored_aliases:
+                aliases.setdefault(alias, set()).add(product_id)
+
+    matches = []
+    for alias, product_ids in aliases.items():
+        if len(product_ids) != 1:
+            continue
+        start = text.find(alias)
+        if start >= 0:
+            matches.append((start, len(alias), next(iter(product_ids))))
+    matches.sort(key=lambda match: (-match[1], match[0]))
+
+    selected = []
+    occupied = []
+    for start, length, product_id in matches:
+        if product_id in selected or any(start < end and start + length > begin for begin, end in occupied):
+            continue
+        selected.append(product_id)
+        occupied.append((start, start + length))
+        if len(selected) == 5:
+            break
+    if not selected:
+        return None
+    return {
+        "type": "add_to_cart",
+        "items": [{"product_id": product_id, "quantity": 1} for product_id in selected],
+    }
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -391,17 +427,12 @@ class Handler(SimpleHTTPRequestHandler):
                 result = json.loads(response.read().decode("utf-8"))
             assistant_message = result.get("message", {})
             reply = str(assistant_message.get("content", "")).strip()
-            tool_calls = assistant_message.get("tool_calls", [])
+            _, has_cart_json, clean_reply = _cart_action_from_reply(reply, allowed_products)
             cart_action = (
-                _validated_cart_action(tool_calls, allowed_products)
-                if allow_cart_action and isinstance(tool_calls, list)
+                _cart_action_from_user_request(message, allowed_products)
+                if allow_cart_action
                 else None
             )
-            reply_cart_action, has_cart_json, clean_reply = _cart_action_from_reply(
-                reply, allowed_products
-            )
-            if allow_cart_action and cart_action is None:
-                cart_action = reply_cart_action
             if has_cart_json:
                 if cart_action:
                     reply = clean_reply or "好的，我已依你的指示將商品加入購物車。"
@@ -410,7 +441,9 @@ class Handler(SimpleHTTPRequestHandler):
                 elif not explicit_cart_request:
                     reply = "這則訊息沒有明確要求加入購物車，所以我沒有修改購物車。"
                 else:
-                    reply = clean_reply or "我無法確認指定商品或庫存，因此沒有修改購物車。"
+                    reply = "我無法確認你指定且目前有庫存的商品，購物車沒有變更。"
+            if allow_cart_action and not cart_action and not has_cart_json:
+                reply = "我無法確認你指定且目前有庫存的商品，購物車沒有變更。"
             if not allow_cart_action and re.search(
                 r"(?:已加入|已經加入|已放進|已放入|幫你加入|已為你加入).{0,12}購物車", reply
             ):
