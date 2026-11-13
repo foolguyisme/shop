@@ -28,6 +28,7 @@ PUBLIC_SITE_ORIGIN = "https://foolguyisme.github.io"
 GITHUB_API = "https://api.github.com/repos/foolguyisme/shop"
 STATUS_BRANCH = "local-ai-status"
 STATUS_FILE = "Xiaobei_App_Local_AI_Bundle/live-ai.json"
+TOKEN_FILE = BUNDLE / ".public-ai-token"
 DRIVE_ALIAS = "X:"
 CLOUDFLARED = WORKSPACE / "Cloudflared" / "cloudflared.exe"
 OLLAMA = Path(r"X:\Ollama\ollama.exe")
@@ -127,6 +128,25 @@ def github_error(exc: urllib.error.HTTPError) -> str:
     return f"GitHub API HTTP {exc.code}" + (f": {detail}" if detail else "")
 
 
+def load_public_ai_token() -> str:
+    try:
+        token = TOKEN_FILE.read_text(encoding="utf-8-sig").strip()
+        if len(token) >= 32:
+            return token
+    except FileNotFoundError:
+        pass
+
+    token = secrets.token_urlsafe(24)
+    try:
+        with TOKEN_FILE.open("x", encoding="utf-8") as token_file:
+            token_file.write(token + "\n")
+    except FileExistsError:
+        token = TOKEN_FILE.read_text(encoding="utf-8-sig").strip()
+    if len(token) < 32:
+        raise RuntimeError(f"Could not create a persistent AI token at {TOKEN_FILE}.")
+    return token
+
+
 def publish_live_ai_status(endpoint: str, token: str) -> None:
     headers = github_headers()
     ref_path = f"/git/ref/heads/{STATUS_BRANCH}"
@@ -211,7 +231,7 @@ def run() -> int:
                 "Install the Cloudflare Windows binary there and run this BAT again."
             )
 
-        token = secrets.token_urlsafe(24)
+        token = load_public_ai_token()
         ollama_env = os.environ.copy()
         ollama_env.update(
             {
