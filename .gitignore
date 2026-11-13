@@ -1,0 +1,13 @@
+**/.env
+**/.venv/
+**/venv/
+**/__pycache__/
+*.py[cod]
+/Ollama/
+/OllamaModels/
+/Cloudflare/
+/Cloudflared/
+/dist/
+/site/
+/xiaobei-pages.zip
+*.log
