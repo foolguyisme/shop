@@ -1,6 +1,6 @@
 {
-  "enabled": false,
-  "endpoint": "",
-  "token": "",
-  "updated_at": "2026-11-13T05:42:10Z"
+  "enabled": true,
+  "endpoint": "https://acer-proc-sensors-discover.trycloudflare.com",
+  "token": "BXjvAU9m6hCKn9coYKSl5a83rrccycXd",
+  "updated_at": "2026-11-13T05:44:36Z"
 }
