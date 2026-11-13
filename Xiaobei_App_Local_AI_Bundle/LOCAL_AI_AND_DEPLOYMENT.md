@@ -11,11 +11,11 @@
 
 1. 確認 `D:\小北\Cloudflared\cloudflared.exe` 已安裝，並且 Ollama、模型、Python 3.9+ 均在本機資料夾與環境中。
 2. 雙擊 `Xiaobei_App_Local_AI_Bundle\start-local-ai.bat`。
-3. 在啟動視窗找到 `AI-READY LINK` 和 `LOCAL AI ACCESS CODE`。
-4. 分享公開網站連結與本次啟動的存取碼給訪客。AI-ready link 會預填本次隧道網址；訪客在客服窗輸入存取碼並按「連線本機 AI」。
+3. 在啟動視窗找到 `AI-READY LINK`。
+4. 將 AI-ready link 分享給公開訪客。它包含本次隧道網址與臨時存取碼，訪客開啟後會自動連線，不需分別輸入資料。若只分享固定 Pages 網址，訪客須在客服窗手動輸入 BAT 顯示的隧道網址與存取碼。
 5. 保持 BAT 視窗開啟。按 Ctrl+C 或關閉視窗會停止隧道、客服 API 和本機 Ollama；之後訪客只能看到網站，無法使用本機模型。
 
-Cloudflare Quick Tunnel 不需把 Ollama 或 API 連接埠直接開到網際網路；API 僅監聽 `127.0.0.1`。每次啟動都會產生新的暫時網址與存取碼，因此舊連結/存取碼在停止或重新啟動後失效。這是展示與試用用的臨時隧道，不是固定服務網址。
+Cloudflare Quick Tunnel 不需把 Ollama 或 API 連接埠直接開到網際網路；API 僅監聽 `127.0.0.1`。AI-ready link 是本次啟動的限時分享連結，內含臨時存取碼；任何取得此連結的人，在 BAT 執行期間都能使用本機 AI。每次啟動都會產生新的網址與存取碼，停止或重新啟動後舊連結失效。這是展示與試用用的臨時隧道，不是固定服務網址。
 
 ## 客服購物車權限
 

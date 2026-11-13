@@ -202,12 +202,18 @@ def run() -> int:
                 raise RuntimeError("cloudflared stopped before creating a public URL.")
             raise RuntimeError("Timed out waiting for the Cloudflare Tunnel URL.")
 
-        ai_link = PUBLIC_SITE_URL + "?ai_endpoint=" + urllib.parse.quote(tunnel_url, safe="")
+        ai_link = (
+            PUBLIC_SITE_URL
+            + "?ai_endpoint="
+            + urllib.parse.quote(tunnel_url, safe="")
+            + "&ai_access_code="
+            + urllib.parse.quote(token, safe="")
+        )
         print("")
         print("PUBLIC WEBSITE:", PUBLIC_SITE_URL)
         print("AI-READY LINK:", ai_link)
-        print("LOCAL AI ACCESS CODE:", token)
-        print("Share the AI-ready link and access code only with intended visitors.")
+        print("LOCAL AI ACCESS CODE (for manual entry):", token)
+        print("Share the AI-ready link with public visitors; it auto-connects while this BAT is running.")
         print("The model and Ollama remain on this computer. Press Ctrl+C to stop the tunnel and local services.")
         webbrowser.open(ai_link)
 
