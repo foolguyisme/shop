@@ -1,6 +1,6 @@
 {
-  "enabled": false,
-  "endpoint": "",
-  "token": "",
-  "updated_at": "2026-11-13T06:15:31Z"
+  "enabled": true,
+  "endpoint": "https://immediately-tablet-sees-cape.trycloudflare.com",
+  "token": "7vyLZkK_u5Hj2cCrnYSNT-K-2A4PoUtJ",
+  "updated_at": "2026-11-13T06:16:29Z"
 }
