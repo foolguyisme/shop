@@ -158,22 +158,50 @@ def _cart_action_from_reply(reply: str, allowed: dict[str, dict]) -> tuple[dict 
     if parsed is None:
         return None, False, reply
 
-    action_name = str(parsed.get("action", parsed.get("type", ""))).strip().lower()
-    if action_name not in ("add", "add_to_cart", "add_products_to_cart"):
+    raw_action = str(parsed.get("action", parsed.get("type", ""))).strip()
+    action_name = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", raw_action).lower()
+    action_name = re.sub(r"[\s-]+", "_", action_name)
+    compact_action = re.sub(r"[^a-z0-9]", "", action_name)
+    is_add_to_cart = action_name in (
+        "add",
+        "add_to_cart",
+        "add_products_to_cart",
+        "add_product_to_cart",
+    ) or ("add" in compact_action and "cart" in compact_action)
+    if not is_add_to_cart:
         return None, False, reply
 
     rows = parsed.get("items")
     if not isinstance(rows, list):
         item = parsed.get("item")
-        rows = [item] if isinstance(item, dict) else []
+        rows = [item] if isinstance(item, (dict, str)) else []
+
+    def product_id_for(value: object) -> str:
+        candidate = str(value or "").strip()
+        if candidate in allowed:
+            return candidate
+        matches = [
+            product_id
+            for product_id, product in allowed.items()
+            if candidate and product["name"].strip().casefold() == candidate.casefold()
+        ]
+        return matches[0] if len(matches) == 1 else ""
+
     normalized = []
     for row in rows[:5]:
+        if isinstance(row, str):
+            product_id = product_id_for(row)
+            if product_id:
+                normalized.append({"product_id": product_id, "quantity": 1})
+            continue
         if not isinstance(row, dict):
             continue
-        product_id = row.get("product_id", row.get("id", ""))
+        product_id = product_id_for(
+            row.get("product_id", row.get("id", row.get("product_name", row.get("name", ""))))
+        )
         normalized.append(
             {
-                "product_id": str(product_id).strip(),
+                "product_id": product_id,
                 "quantity": row.get("quantity", row.get("qty", 1)),
             }
         )
